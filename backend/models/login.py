@@ -1,4 +1,4 @@
-from app import db
+from extensions.db_extensions import db
 
 class Login(db.Model):
     __tablename__ = 'login'  # Explicit table name for clarity
@@ -6,5 +6,5 @@ class Login(db.Model):
     username = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=True)
     password = db.Column(db.String(120), unique=True, nullable=True)
-
+    name = db.Column(db.String(80), nullable=False)
     

@@ -1,4 +1,4 @@
-from app import db
+from extensions.db_extensions import db
 
 class Manager(db.Model):
     __tablename__ = 'manager'  # Explicit table name for clarity

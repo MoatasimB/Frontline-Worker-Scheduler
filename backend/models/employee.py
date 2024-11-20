@@ -1,4 +1,4 @@
-from app import db
+from extensions.db_extensions import db
 
 class Employee(db.Model):
     __tablename__ = 'employee'  # Explicit table name for clarity
@@ -10,5 +10,5 @@ class Employee(db.Model):
     type = db.Column(db.String(80), nullable=False)
     # Relationships
     managers = db.relationship('Manager', backref='employees', lazy=True)
-    timesheets = db.relationship('timesheet', backref='employee', lazy=True)
+    timesheets = db.relationship('Timesheet', backref='employees', lazy=True)
 
