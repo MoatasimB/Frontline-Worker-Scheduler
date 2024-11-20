@@ -23,4 +23,4 @@ class Timesheet(db.Model):
 
     
     # Foreign Key to reference the User model
-    employee_id = db.Column(db.Integer, db.ForeignKey('employee.id'), nullable=False)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employee.id', name='fk_timesheet_employee'), nullable=False)
