@@ -17,6 +17,7 @@ class LoginDao:
             elif "email" in str(e.orig):
                 return False, "Error: Email must be unique."
             else:
+                print(e)
                 return False, "Error: An unknown integrity error occurred."
 
     def get_all_users(self):
@@ -31,6 +32,10 @@ class LoginDao:
             }
             for user in users
         ]
+
+    def get_user_by_username(self, username):
+        return Login.query.filter_by(username=username).first()
+
 
     def validate_login(self, username, password):
         query = Login.query.filter_by(username=username, password=password).first()

@@ -1,4 +1,4 @@
-"""added name field to Login table
+"""added name field to Register table
 
 Revision ID: 070f96fac284
 Revises: 69cc159e9440

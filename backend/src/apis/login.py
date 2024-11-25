@@ -1,27 +1,55 @@
 from daos.loginDao import LoginDao
 from flask import request
 
+from daos.employeeDao import EmployeeDao
+
+from daos.managerDao import ManagerDao
+
+
 class Login:
     def __init__(self):
         self.loginDao = LoginDao()
+        self.employeeDao = EmployeeDao()
+        self.managerDao = ManagerDao()
     def add_user(self):
         response = {"code": 0, "message": "", "status": "fail"}
         data = request.get_json()
-        if 'name' in data and 'username' in data and 'email' in data and 'password' in data:
+        if 'name' in data and 'username' in data and 'email' in data and 'password' in data and 'phone' in data and 'type' in data:
             name = data['name']
-            email = data['email']
             username = data['username']
+            email = data['email']
             password = data['password']
+            phone = data['phone']
+            type = data['type']  # Staff or Manager
+            manager_id = data.get('manager_id')  # Optional manager ID
             try:
                 user_is_added, message = self.loginDao.add_user(name, username, email, password)
                 if user_is_added:
+
+                    login_user = self.loginDao.get_user_by_username(username)
+                    emp_is_added, emp_message = self.employeeDao.add_employee(
+                        login_id=login_user.id,
+                        name=name,
+                        email=email,
+                        phone=phone,
+                        type=type,
+                        manager_id=manager_id
+                    )
+                if manager_id == 0:
+                    man_is_added, man_message = self.managerDao.add_manager(
+                        name=name,
+                        email=email,
+                        phone=phone,
+                        type=type,
+                    )
+
                     response["code"] = 1
                     response["message"] = message
                     response["status"] = "success"
                 else:
                     response["code"] = 1
                     response["message"] = message
-                    response["status"] = "success"
+                    response["status"] = "fail"
             except Exception as e:
                 response["message"] = f"failed to add user, {e}"
         else:

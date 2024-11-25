@@ -2,6 +2,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from extensions.db_extensions import db, migrate
 from src.routes import routes
+from flask_cors import CORS
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydatabase.db'  # Database file
@@ -15,6 +17,6 @@ from models.timesheet import Timesheet
 from models.manager import Manager
 
 app.register_blueprint(routes, url_prefix='/api')
-
+CORS(app)
 if __name__ == '__main__':
     app.run(debug=True)
