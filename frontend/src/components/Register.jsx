@@ -11,35 +11,45 @@ const Register = () => {
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     const [name, setName] = useState("");
+    const [phone, setPhone] = useState("");
+    const [selectedNurseType, setSelectedNurseType] = useState(null);
     const [submittedDetails, setSubmittedDetails] = useState(false);
     const [selectedManager, setSelectedManager] = useState(null);
     const [managers, setManagers] = useState([]);
+
+    let nurseTypes = [
+        {"name": "RN"},
+        {"name": "ANC"}
+    ]
 
     const onNextClick = () => {
         getAllManagers();
         setSubmittedDetails(true);
     }
 
-    const getAllManagers = () => {
-        const dummyData = [
-            {
-                "name": "John",
-                "id": "1"
+    const getAllManagers = async () => {
+        try {
+            // Send a POST request to your backend
+            const response = await fetch('http://127.0.0.1:5000/api/get_all_managers', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            console.log("Response Status:", response.status);
 
-            },
-            {
-                "name": "James",
-                "id": "2"
+            if (response.ok && data.status === 'success') {
+                setManagers(data.managers);
 
-            },
-            {
-                "name": "Jack",
-                "id": "3"
-
+                console.log('Success:', data);
+            } else {
+                console.error('Error:', data.message);
             }
-        ]
+        } catch (error) {
+            console.error('Error:', error);
+        }
 
-        setManagers(dummyData);
     }
 
     const handleSubmit = async (e) => {
@@ -51,6 +61,9 @@ const Register = () => {
             password,
             email,
             name,
+            phone,
+            type: selectedNurseType.name,
+            manager_id: selectedManager.id,
         };
 
         try {
@@ -110,9 +123,65 @@ const Register = () => {
             )}
             {submittedDetails && (
                 <div className="card flex justify-content-center">
-                    <Dropdown value={selectedManager} onChange={(e) => setSelectedManager(e.value)} options={managers}
-                              optionLabel="name"
-                              placeholder="Select a Manager" className="w-full md:w-14rem"/>
+                    <Dropdown
+                        value={selectedManager}
+                        onChange={(e) => setSelectedManager(e.value)}
+                        options={managers}
+                        optionLabel="name"
+                        placeholder="Select a Manager"
+                        className="w-full"
+                        style={{
+                            width: '100%',
+                            maxWidth: '300px',
+                            marginBottom: '25px',
+                        }}
+                    />
+                    <Dropdown
+                        value={selectedNurseType}
+                        onChange={(e) => setSelectedNurseType(e.value)}
+                        options={nurseTypes}
+                        optionLabel="name"
+                        placeholder="Select a nurse type"
+                        className="w-full"
+                        style={{
+                            width: '100%',
+                            maxWidth: '300px',
+                            marginBottom: '25px',
+                        }}
+                    />
+                    <form
+                        onSubmit={handleSubmit}
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '1rem',
+                            maxWidth: '300px',
+                            margin: 'auto',
+                        }}
+                    >
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '1rem',
+                            maxWidth: '300px',
+                            margin: 'auto',
+                        }}>
+                            <span className="p-float-label" style={{ marginBottom: '8px', maxWidth: '300px' }}>
+                                <InputText id="phone"
+                                           value={phone}
+                                           onChange={(e) => setPhone(e.target.value)}
+                                           required
+                                           type="tel"
+                                           pattern="^\+?[1-9]\d{1,14}$"/>
+                                <label htmlFor="phone">Phone Number</label>
+                            </span>
+                            <Button
+                                label="Submit"
+                                type="submit"
+                                disabled={phone === "" || selectedNurseType === null || selectedManager === null}
+                            />
+                        </div>
+                    </form>
                 </div>
             )}
         </div>

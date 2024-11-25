@@ -1,9 +1,16 @@
 from flask import Blueprint, jsonify, request
 from src.apis.login import Login
 
+from src.apis.manager import Manager
+
 routes = Blueprint('routes', __name__)
 
 login = Login()
+manager = Manager()
+
+@routes.route('/test', methods=['GET'])
+def test_route():
+    return jsonify({"message": "Test route works!"})
 
 @routes.route('/add_user', methods=['POST'])
 def add_user():
@@ -22,3 +29,15 @@ def validate_user():
 @routes.route('/delete_user', methods=['DELETE'])
 def delete_user():
     return jsonify(login.delete_user())
+
+
+@routes.route('/add_manager', methods=['POST'])
+def add_manager():
+    """Route to add a new manager."""
+    return jsonify(manager.add_manager())
+
+
+@routes.route('/get_all_managers', methods=['GET'])
+def get_all_managers():
+    """Route to add a new employee."""
+    return jsonify(manager.get_all_managers())

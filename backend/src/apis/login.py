@@ -35,13 +35,13 @@ class Login:
                         type=type,
                         manager_id=manager_id
                     )
-                if manager_id == 0:
-                    man_is_added, man_message = self.managerDao.add_manager(
-                        name=name,
-                        email=email,
-                        phone=phone,
-                        type=type,
-                    )
+                    if manager_id == 0:
+                        man_is_added, man_message = self.managerDao.add_manager(
+                            name=name,
+                            email=email,
+                            phone=phone,
+                            type=type,
+                        )
 
                     response["code"] = 1
                     response["message"] = message
