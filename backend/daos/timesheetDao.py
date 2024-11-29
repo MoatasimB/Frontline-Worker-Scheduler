@@ -15,6 +15,10 @@ class TimesheetDao:
             print(e)
             return False, "Error: An unknown integrity error occurred."
 
+    def update_timesheet(self,year, employee_id, month, week1, week2, week3, week4):
+        pass
 
+    def delete_timesheet(self,year, employee_id, month):
+        pass
 
 
