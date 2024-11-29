@@ -30,4 +30,17 @@ class ManagerDao:
             for man in mans
         ]
 
+    def delete_manager(self, name):
+        query = Manager.query.filter_by(name=name).first()
+
+        if query:
+            try:
+                db.session.delete(query)
+                db.session.commit()
+                return True
+            except Exception as e:
+                db.session.rollback()
+                return False
+        else:
+            return False
 

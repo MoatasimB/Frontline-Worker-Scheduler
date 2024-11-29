@@ -1,0 +1,6 @@
+.input-field, .dropdown-field {
+    width: 100%;
+    max-width: 300px; /* Adjust based on your desired width */
+    margin-bottom: 8px;
+    box-sizing: border-box; /* Ensures padding is included in width calculation */
+}

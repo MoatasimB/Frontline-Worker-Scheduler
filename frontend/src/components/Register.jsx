@@ -5,6 +5,7 @@ import 'primereact/resources/themes/saga-blue/theme.css';  // Theme CSS
 import 'primereact/resources/primereact.min.css';          // Core CSS
 import 'primeicons/primeicons.css';                        // PrimeIcons CSS
 import { Dropdown } from 'primereact/dropdown';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
     const [username, setUsername] = useState("");
@@ -16,6 +17,8 @@ const Register = () => {
     const [submittedDetails, setSubmittedDetails] = useState(false);
     const [selectedManager, setSelectedManager] = useState(null);
     const [managers, setManagers] = useState([]);
+
+    const navigate = useNavigate();
 
     let nurseTypes = [
         {"name": "RN"},
@@ -40,7 +43,9 @@ const Register = () => {
             console.log("Response Status:", response.status);
 
             if (response.ok && data.status === 'success') {
-                setManagers(data.managers);
+                let fetchedManagers = data.managers;
+                fetchedManagers.push({"id": 0, "name": "I am a manager"})
+                setManagers(fetchedManagers);
 
                 console.log('Success:', data);
             } else {
@@ -50,6 +55,9 @@ const Register = () => {
             console.error('Error:', error);
         }
 
+    }
+    const onLogin = () => {
+        navigate('/');
     }
 
     const handleSubmit = async (e) => {
@@ -79,12 +87,10 @@ const Register = () => {
             console.log("Response Status:", response.status);
 
             if (response.ok && data.status === 'success') {
-
                 console.log('Success:', data);
-                alert('User submitted successfully!');
+                onLogin();
             } else {
                 console.error('Error:', data.message);
-                alert(`Submission failed. Please try again.\`${data.message}`);
             }
         } catch (error) {
             console.error('Error:', error);
@@ -101,20 +107,20 @@ const Register = () => {
                 >
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '300px', margin: 'auto' }}>
                     <span className="p-float-label" style={{marginBottom: '8px'}}>
-                        <InputText id="username" value={username} onChange={(e) => setUsername(e.target.value)} />
-                        <label htmlFor="username">Username</label>
+                        <InputText id="register_username" value={username} onChange={(e) => setUsername(e.target.value)} />
+                        <label htmlFor="register_username">Username</label>
                     </span>
                     <span className="p-float-label" style={{marginBottom: '8px'}}>
-                        <InputText id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                        <label htmlFor="password">Password</label>
+                        <InputText id="register_password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                        <label htmlFor="register_password">Password</label>
                     </span>
                     <span className="p-float-label" style={{marginBottom: '8px'}}>
-                        <InputText id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                        <label htmlFor="email">Email</label>
+                        <InputText id="register_email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                        <label htmlFor="register_email">Email</label>
                     </span>
                     <span className="p-float-label" style={{marginBottom: '8px'}}>
-                        <InputText id="name" value={name} onChange={(e) => setName(e.target.value)} />
-                        <label htmlFor="name">Name</label>
+                        <InputText id="register_name" value={name} onChange={(e) => setName(e.target.value)} />
+                        <label htmlFor="register_name">Name</label>
                     </span>
                     <Button label="Next" type="submit" disabled={username === "" || password === "" || email === "" || name === ""} />
 
@@ -122,7 +128,7 @@ const Register = () => {
                 </form>
             )}
             {submittedDetails && (
-                <div className="card flex justify-content-center">
+                <div className="" style={{display: 'flex', flexDirection: 'column'}}>
                     <Dropdown
                         value={selectedManager}
                         onChange={(e) => setSelectedManager(e.value)}
@@ -131,8 +137,7 @@ const Register = () => {
                         placeholder="Select a Manager"
                         className="w-full"
                         style={{
-                            width: '100%',
-                            maxWidth: '300px',
+                            width: '300px',
                             marginBottom: '25px',
                         }}
                     />
@@ -144,8 +149,7 @@ const Register = () => {
                         placeholder="Select a nurse type"
                         className="w-full"
                         style={{
-                            width: '100%',
-                            maxWidth: '300px',
+                            width: '300px',
                             marginBottom: '25px',
                         }}
                     />
@@ -155,7 +159,7 @@ const Register = () => {
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '1rem',
-                            maxWidth: '300px',
+                            width: '300px',
                             margin: 'auto',
                         }}
                     >
@@ -163,11 +167,12 @@ const Register = () => {
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '1rem',
-                            maxWidth: '300px',
+                            width: '300px',
                             margin: 'auto',
                         }}>
-                            <span className="p-float-label" style={{ marginBottom: '8px', maxWidth: '300px' }}>
+                            <span className="p-float-label" style={{ marginBottom: '8px', width: '100%' }}>
                                 <InputText id="phone"
+                                           style={{ width: '100%' }}
                                            value={phone}
                                            onChange={(e) => setPhone(e.target.value)}
                                            required

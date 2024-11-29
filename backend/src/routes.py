@@ -41,3 +41,7 @@ def add_manager():
 def get_all_managers():
     """Route to add a new employee."""
     return jsonify(manager.get_all_managers())
+
+@routes.route('/delete_manager', methods=['DELETE'])
+def delete_manager():
+    return jsonify(manager.delete_manager())

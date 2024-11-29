@@ -46,3 +46,22 @@ class Manager:
         except Exception as e:
             response["message"] = f"failed to add user, {e}"
         return response
+
+    def delete_manager(self):
+        response = {"code": 0, "message": "", "status": "fail", "is_deleted": False}
+        data = request.get_json()
+        if 'name' in data:
+            user_is_deleted = self.managerDao.delete_manager(data['name'])
+            if user_is_deleted:
+                response["code"] = 1
+                response["message"] = "successfully deleted user"
+                response["status"] = "success"
+                response["is_deleted"] = user_is_deleted
+            else:
+                response["code"] = 1
+                response["message"] = "failed to delete user"
+                response["status"] = "fail"
+                response["is_deleted"] = user_is_deleted
+        else:
+            response["message"] = "Invalid request body"
+        return response

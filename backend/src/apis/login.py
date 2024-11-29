@@ -82,8 +82,8 @@ class Login:
                     response["is_valid"] = True
                 else:
                     response["code"] = 1
-                    response["message"] = "username or password is invalid"
-                    response["status"] = "success"
+                    response["message"] = "Username or Password is Invalid"
+                    response["status"] = "fail"
                     response["is_valid"] = False
             except Exception as e:
                 response["message"] = f"failed to validate user, {e}"
