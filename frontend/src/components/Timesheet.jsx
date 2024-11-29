@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import { Calendar } from 'primereact/calendar';
 import {useParams} from "react-router-dom";
 
-const Timesheet = () => {
+const Timesheet = ({viewOnly, minDate, maxDate}) => {
     const [dates, setDates] = useState(null);
     const today = new Date();
     const { id } = useParams();
@@ -19,7 +19,9 @@ const Timesheet = () => {
                     inline
                     showWeek
                     selectionMode="multiple"
-                    minDate={today}
+                    minDate={minDate}
+                    maxDate={maxDate}
+                    disabled={viewOnly}
                     style={{
                             fontSize: '5.5rem', // Adjust font size
                             width: '700px', // Adjust width

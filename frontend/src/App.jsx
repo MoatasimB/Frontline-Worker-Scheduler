@@ -3,6 +3,7 @@ import Register from "./components/Register";
 import Login from "./components/Login.jsx";
 import Timesheet from "./components/Timesheet.jsx";
 import Schedule from "./components/Schedule.jsx";
+import EditSchedule from "./components/EditSchedule.jsx";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 const App = () => {
