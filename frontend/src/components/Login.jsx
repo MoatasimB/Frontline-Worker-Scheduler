@@ -6,8 +6,9 @@ import { useNavigate } from 'react-router-dom';
 const Login = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [validUser, setValidUser] = useState(false);
+    const [_, setValidUser] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [userId, setUserId] = useState(null);
 
     const navigate = useNavigate();
 
@@ -15,10 +16,6 @@ const Login = () => {
         e.preventDefault();
         navigate('/register');
     }
-    const onHome = () => {
-        navigate('/home');
-    }
-
 
     const validateUser = async (e) => {
         e.preventDefault();
@@ -38,11 +35,10 @@ const Login = () => {
             console.log("Response Status:", response.status);
 
             if (response.ok && data.status === 'success') {
-                setValidUser(true);
-                onHome();
                 console.log('Success:', data);
+                setUserId(data.user.id);
+                navigate(`/schedule/${data.user.id}`);
             } else if(response.ok && data.status === 'fail')  {
-                setValidUser(false);
                 setErrorMessage(data.message);
             }
             else {

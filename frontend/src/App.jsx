@@ -1,7 +1,8 @@
 import './App.css';
 import Register from "./components/Register";
 import Login from "./components/Login.jsx";
-import Home from "./components/Home.jsx";
+import Timesheet from "./components/Timesheet.jsx";
+import Schedule from "./components/Schedule.jsx";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 const App = () => {
@@ -17,7 +18,8 @@ const App = () => {
             <Routes>
                 <Route path="/" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/home" element={<Home />} />
+                <Route path="/timesheet/:id" element={<Timesheet />} />
+                <Route path="/schedule/:id" element={<Schedule />} />
 
             </Routes>
         </Router>

@@ -3,10 +3,13 @@ from src.apis.login import Login
 
 from src.apis.manager import Manager
 
+from src.apis.timesheet import Timesheet
+
 routes = Blueprint('routes', __name__)
 
 login = Login()
 manager = Manager()
+timesheet = Timesheet()
 
 @routes.route('/test', methods=['GET'])
 def test_route():
@@ -45,3 +48,7 @@ def get_all_managers():
 @routes.route('/delete_manager', methods=['DELETE'])
 def delete_manager():
     return jsonify(manager.delete_manager())
+
+@routes.route('/add_timesheet', methods=['POST'])
+def add_timesheet():
+    return jsonify(timesheet.add_timesheet())
