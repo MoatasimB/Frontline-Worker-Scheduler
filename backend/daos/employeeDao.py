@@ -58,6 +58,20 @@ class EmployeeDao:
             }
         return None
 
+    def get_employee_by_employee_id(self, employee_id):
+        """Retrieve an employee by their employee ID."""
+        employee = Employee.query.filter_by(id=employee_id).first()
+        if employee:
+            return {
+                "id": employee.id,
+                "name": employee.name,
+                "email": employee.email,
+                "phone": employee.phone,
+                "type": employee.type,
+                "manager_id": employee.manager_id,
+                "login_id": employee.login_id
+            }
+        return None
     def delete_employee(self, employee_id):
         """Delete an employee by their ID."""
         employee = Employee.query.get(employee_id)
