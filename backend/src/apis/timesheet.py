@@ -1,3 +1,5 @@
+from warnings import catch_warnings
+
 from daos.timesheetDao import TimesheetDao
 from flask import request
 import json
@@ -60,6 +62,64 @@ class Timesheet:
                             response["message"] = message
                             response["status"] = "success"
                         else:
+                            response["code"] = 0
+                            response["message"] = message
+                            response["status"] = "fail"
+            except Exception as e:
+                response["message"] = f"failed to add user, {e}"
+
+        else:
+            response["message"] = "Invalid request body"
+
+        return response
+
+    def get_timesheet(self):
+        response = {"code": 0, "message": "", "status": "fail", "ts": None}
+        data = request.get_json()
+        if 'employee_id' in data and 'month' in data and 'year' in data:
+            try:
+                ts = self.timesheetDao.get_timesheet(data['employee_id'], data['month'], data['year'])
+                response = {"code": 1, "message": "Retrieved TimeSheet", "status": "success", "ts": ts}
+            except Exception as e:
+                response["message"] = f"failed to get timesheet, {e}"
+        else:
+            response["message"] = "Invalid request body"
+        return response
+
+    def update_timesheet(self):
+        response = {"code": 0, "message": "", "status": "fail"}
+        data = request.get_json()
+
+        if 'employee_id' in data and 'dates' in data:
+            employee_id = data['employee_id']
+            try:
+                for item in data['dates']:
+                    year = item.get('year')
+                    month = item.get('month')
+                    weeks = item.get('weeks')
+                    if month and weeks:
+                        curr = {"Sun": "0", "Mon": "0", "Tues": "0", "Wed": "0", "Thurs": "0", "Fri": "0", "Sat": "0"}
+                        week_vals = {"1": json.dumps(curr), "2": json.dumps(curr), "3": json.dumps(curr), "4": json.dumps(curr)}
+                        for key, days in weeks.items():
+                            for day in days:
+                                curr[day] = "1"
+                            curr_str = json.dumps(curr)
+                            week_vals[key] = curr_str
+                        updated_timesheet, message = self.timesheetDao.update_timesheet(
+                            year=year,
+                            month=month,
+                            week1=week_vals["1"],
+                            week2=week_vals["2"],
+                            week3=week_vals["3"],
+                            week4=week_vals["4"],
+                            employee_id=employee_id
+                        )
+
+                        if updated_timesheet:
+                            response["code"] = 1
+                            response["message"] = message
+                            response["status"] = "success"
+                        else:
                             response["code"] = 1
                             response["message"] = message
                             response["status"] = "fail"
@@ -71,4 +131,24 @@ class Timesheet:
 
         return response
 
+    def delete_timesheet(self):
+        response = {"code": 0, "message": "", "status": "fail"}
+        data = request.get_json()
+        if 'employee_id' in data and 'month' in data and 'year' in data:
+            try:
+                deleted_timesheet, message = self.timesheetDao.delete_timesheet(employee_id=data['employee_id'], month=data['month'], year=data['year'])
 
+                if deleted_timesheet:
+                    response["code"] = 1
+                    response["message"] = message
+                    response["status"] = "success"
+                else:
+                    response["code"] = 0
+                    response["message"] = message
+                    response["status"] = "fail"
+            except Exception as e:
+                response["message"] = f"failed to delete timesheet, {e}"
+        else:
+            response["message"] = "Invalid request body"
+
+        return response

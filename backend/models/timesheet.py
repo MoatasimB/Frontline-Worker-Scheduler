@@ -15,8 +15,8 @@ def default_year():
 class Timesheet(db.Model):
     __tablename__ = 'timesheet'  # Explicit table name for clarity
     id = db.Column(db.Integer, primary_key=True)  # Primary Key
-    month = db.Column(db.String(15), nullable=False, default = default_month)
-    year = db.Column(db.String(4), nullable=False, default = default_year)
+    month = db.Column(db.String(15),db.UniqueConstraint(name="uq_month"), nullable=False, default = default_month)
+    year = db.Column(db.String(4),db.UniqueConstraint(name="uq_year"), nullable=False, default = default_year)
     week1 = db.Column(db.String(40), nullable=True, default=default_week)
     week2 = db.Column(db.String(40), nullable=True, default=default_week)
     week3 = db.Column(db.String(40), nullable=True, default=default_week)
