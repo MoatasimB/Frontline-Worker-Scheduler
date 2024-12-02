@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Calendar } from "primereact/calendar";
 import { useParams } from "react-router-dom";
 
-const Timesheet = ({ viewOnly, minDate, maxDate, setViewDate }) => {
-    const [dates, setDates] = useState(null);
+const Timesheet = ({ viewOnly, minDate, maxDate, setViewDate, dates }) => {
+    // const [dates, setDates] = useState(null);
     const { id } = useParams();
 
     const handleDateChange = (e) => {
@@ -14,14 +14,14 @@ const Timesheet = ({ viewOnly, minDate, maxDate, setViewDate }) => {
 
     const handleDateSelect = (e) => {
         if (viewOnly) {
-            e.preventDefault();
+            // e.preventDefault();
         }
     };
 
     const handleViewDateChange = (e) => {
         const viewDate = e.viewDate;
-        const currentMonth = viewDate.toLocaleString("default", { month: "long" });
-        const currentYear = viewDate.getFullYear();
+        const currentMonth = viewDate?.toLocaleString("default", { month: "long" });
+        const currentYear = viewDate?.getFullYear();
 
         setViewDate([currentMonth, currentYear]);
     };

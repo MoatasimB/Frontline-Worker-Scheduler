@@ -53,7 +53,7 @@ def delete_manager():
 def add_timesheet():
     return jsonify(timesheet.add_timesheet())
 
-@routes.route('/get_timesheet', methods=['GET'])
+@routes.route('/get_timesheet', methods=['POST'])
 def get_timesheet():
     return jsonify(timesheet.get_timesheet())
 
