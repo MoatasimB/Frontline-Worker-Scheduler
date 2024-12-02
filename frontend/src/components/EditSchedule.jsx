@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Timesheet from "./Timesheet.jsx";
 import { Button } from "primereact/button";
 
@@ -7,87 +7,100 @@ const EditSchedule = () => {
     const { id } = useParams();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const isSick = searchParams.get('sick');
+    const isSick = searchParams.get('sick') === 'true';
 
+    const today = new Date();
+    const [minDate, setMinDate] = useState(null);
+    const [maxDate, setMaxDate] = useState(null);
+    const [viewDate, setViewDate] = useState(today);
     const [selectedDatesByMonth, setSelectedDatesByMonth] = useState({});
-    const [viewDate, setViewDate] = useState(new Date());
-    const [selectedMonth, setSelectedMonth] = useState(
-        viewDate?.toLocaleString("default", { month: "long" })
-    );
-    const [selectedYear, setSelectedYear] = useState(viewDate?.getFullYear());
+    const [selectedMonth, setSelectedMonth] = useState(today?.toLocaleString("default", { month: "long" }));
+    const [selectedYear, setSelectedYear] = useState(today?.getFullYear());
     const [apiDatesCache, setApiDatesCache] = useState({});
     const [userEditedDates, setUserEditedDates] = useState({});
     const [deselectedApiDates, setDeselectedApiDates] = useState({});
 
-    const [sickMinDate, setSickMinDate] = useState(null);
-    const [sickMaxDate, setSickMaxDate] = useState(null);
-
-    const today = new Date();
-    const minDate = new Date(today.getFullYear(), today.getMonth(), 1);
-    const maxDate = new Date(today.getFullYear(), today.getMonth() + 2, 0);
-
     const onBack = () => {
         navigate(`/schedule/${id}`);
-    }
+    };
 
-    // useEffect(() => {
-    //     const today = new Date();
-    //
-    //     // Calculate the start of the week (Sunday)
-    //     const startOfWeek = new Date(today);
-    //     startOfWeek.setDate(today.getDate() - today.getDay());
-    //
-    //     // Calculate the end of the week (Saturday)
-    //     const endOfWeek = new Date(today);
-    //     endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
-    //
-    //     setSickMinDate(startOfWeek);
-    //     setSickMaxDate(endOfWeek);
-    //     }, [])
+    useEffect(() => {
+        // Define date constraints and viewDate for `isSick`
+        if (isSick) {
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay());
+
+            const endOfWeek = new Date(today);
+            endOfWeek.setDate(today.getDate() + (6 - today.getDay()));
+
+            // Update state only if necessary
+            if (!minDate || minDate.getTime() !== startOfWeek.getTime()) {
+                setMinDate(startOfWeek);
+            }
+            if (!maxDate || maxDate.getTime() !== endOfWeek.getTime()) {
+                setMaxDate(endOfWeek);
+            }
+            if (!viewDate || viewDate < startOfWeek || viewDate > endOfWeek) {
+                setViewDate(startOfWeek);
+            }
+        } else {
+            // Define date constraints and viewDate for `isSick = false`
+            const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+            const firstDayNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth(), 1);
+            const lastDayNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0);
+
+            if (!minDate || minDate.getTime() !== firstDayNextMonth.getTime()) {
+                setMinDate(firstDayNextMonth);
+            }
+            if (!maxDate || maxDate.getTime() !== lastDayNextMonth.getTime()) {
+                setMaxDate(lastDayNextMonth);
+            }
+            if (!viewDate || viewDate < firstDayNextMonth || viewDate > lastDayNextMonth) {
+                setViewDate(firstDayNextMonth);
+            }
+
+            // Update selected month and year
+            const currentMonth = firstDayNextMonth.toLocaleString("default", { month: "long" });
+            if (selectedMonth !== currentMonth) {
+                setSelectedMonth(currentMonth);
+            }
+            if (selectedYear !== firstDayNextMonth.getFullYear()) {
+                setSelectedYear(firstDayNextMonth.getFullYear());
+            }
+        }
+    }, [isSick]); // Dependencies limited to `isSick`
 
     const getTimesheet = async () => {
         console.log("Fetching timesheet for:", { selectedMonth, selectedYear });
 
         try {
-            const payload = {
-                employee_id: id,
-                month: selectedMonth,
-                year: selectedYear,
-            };
-
+            const payload = { employee_id: id, month: selectedMonth, year: selectedYear };
             const response = await fetch("http://127.0.0.1:5000/api/get_timesheet", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
 
             const data = await response.json();
 
-            if (response.ok && data.status === "success") {
-                console.log("Success:", data);
-                if (data.ts) {
-                    const dates = generateDates(data.ts);
+            if (response.ok && data.status === "success" && data.ts) {
+                const dates = generateDates(data.ts);
 
-                    // Cache API-provided dates for the current month
-                    setApiDatesCache(prev => ({
-                        ...prev,
-                        [selectedMonth]: dates
-                    }));
+                setApiDatesCache(prev => ({
+                    ...prev,
+                    [`${selectedMonth}-${selectedYear}`]: dates,
+                }));
 
-                    // Merge API dates with user edits
-                    const mergedDates = mergeDates(
-                        dates,
-                        userEditedDates[selectedMonth] || [],
-                        deselectedApiDates[selectedMonth] || []
-                    );
+                const mergedDates = mergeDates(
+                    dates,
+                    userEditedDates[selectedMonth] || [],
+                    deselectedApiDates[selectedMonth] || []
+                );
 
-                    setSelectedDatesByMonth(prev => ({
-                        ...prev,
-                        [`${selectedMonth}-${selectedYear}`]: mergedDates
-                    }));
-                }
+                setSelectedDatesByMonth(prev => ({
+                    ...prev,
+                    [`${selectedMonth}-${selectedYear}`]: mergedDates,
+                }));
             } else {
                 console.error("Error fetching timesheet:", data.message || "Unknown error");
             }
@@ -105,24 +118,17 @@ const EditSchedule = () => {
     };
 
     const mergeDates = (apiDates, userDates, deselectedApiDates) => {
-        // Combine API dates and user edits, excluding deselected API dates
-        const mergedDates = Array.from(
+        return Array.from(
             new Set([
-                ...apiDates
-                    .filter(apiDate => !deselectedApiDates.some(date => date.toISOString() === apiDate.toISOString()))
+                ...apiDates.filter(apiDate => !deselectedApiDates.some(date => date.toISOString() === apiDate.toISOString()))
                     .map(date => date.toISOString()),
                 ...userDates.map(date => date.toISOString())
             ])
         ).map(dateString => new Date(dateString));
-
-        return mergedDates;
     };
 
     const handleDateChange = (dates) => {
-        const validDates = (dates || []).filter(
-            date => date >= minDate && date <= maxDate
-        );
-
+        const validDates = (dates || []).filter(date => date >= minDate && date <= maxDate);
         const apiDates = apiDatesCache[selectedMonth] || [];
 
         const newDeselectedApiDates = apiDates.filter(
@@ -131,110 +137,43 @@ const EditSchedule = () => {
 
         setDeselectedApiDates(prev => ({
             ...prev,
-            [selectedMonth]: newDeselectedApiDates
+            [selectedMonth]: newDeselectedApiDates,
         }));
 
         setUserEditedDates(prev => ({
             ...prev,
             [selectedMonth]: validDates.filter(
                 date => !apiDates.some(apiDate => apiDate.toISOString() === date.toISOString())
-            )
+            ),
         }));
 
         setSelectedDatesByMonth(prev => ({
             ...prev,
-            [`${selectedMonth}-${selectedYear}`]: validDates
+            [`${selectedMonth}-${selectedYear}`]: validDates,
         }));
-
-        console.log("Updated Selected Dates for Current Month:", validDates);
     };
-
-    useEffect(() => {
-        const allSelectedDates = Object.values(selectedDatesByMonth).flat();
-        console.log("All Selected Dates Across All Months:", allSelectedDates);
-    }, [selectedDatesByMonth]);
 
     useEffect(() => {
         if (selectedMonth && selectedYear) {
             const selectedDate = new Date(`${selectedMonth} 1, ${selectedYear}`);
             if (selectedDate >= minDate && selectedDate <= maxDate) {
-                if (apiDatesCache[selectedMonth]) {
+                if (apiDatesCache[`${selectedMonth}-${selectedYear}`]) {
                     const mergedDates = mergeDates(
-                        apiDatesCache[selectedMonth],
+                        apiDatesCache[`${selectedMonth}-${selectedYear}`],
                         userEditedDates[selectedMonth] || [],
                         deselectedApiDates[selectedMonth] || []
                     );
 
                     setSelectedDatesByMonth(prev => ({
                         ...prev,
-                        [`${selectedMonth}-${selectedYear}`]: mergedDates
+                        [`${selectedMonth}-${selectedYear}`]: mergedDates,
                     }));
                 } else {
                     getTimesheet();
                 }
-            } else {
-                console.log("Date is out of range. Skipping API call.");
             }
         }
-    }, [selectedMonth, selectedYear]);
-
-    const formatDates = (dates) => {
-      // Convert each date to a Date object and process
-      const formatted = dates.reduce((acc, dateString) => {
-        const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
-        const date = new Date(dateString);
-        const year = date.getFullYear().toString();
-        const month = monthNames[date.getMonth()];
-        const day = date.getDate();
-
-        // Find or create the corresponding object in the accumulator
-        let yearMonthObject = acc.find(item => item.year === year && item.month === month);
-
-        if (!yearMonthObject) {
-          yearMonthObject = { year, month, selected_days: [] };
-          acc.push(yearMonthObject);
-        }
-
-        // Add the day to the selected_days list
-        yearMonthObject.selected_days.push(day);
-
-        return acc;
-      }, []);
-
-      return formatted;
-    }
-
-    const updateTimesheet = async () => {
-        try {
-            const allSelectedDates = Object.values(selectedDatesByMonth).flat();
-
-            const payload = {
-                employee_id: id,
-                dates: formatDates(allSelectedDates),
-            };
-
-            const response = await fetch("http://127.0.0.1:5000/api/update_timesheet", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.status === "success") {
-                console.log("Timesheet updated successfully:", data);
-            } else {
-                console.error("Error updating timesheet:", data.message || "Unknown error");
-            }
-        } catch (error) {
-            console.error("Error:", error);
-        }
-    };
+    }, [selectedMonth, selectedYear, minDate, maxDate]);
 
     return (
         <div style={{ display: "flex", flexDirection: "column" }}>
@@ -251,7 +190,7 @@ const EditSchedule = () => {
             />
             <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <Button label="Back" type="button" onClick={onBack} />
-                <Button label="Save" type="button" onClick={updateTimesheet} />
+                <Button label="Save" type="button" onClick={() => console.log("Save clicked")} />
             </div>
         </div>
     );

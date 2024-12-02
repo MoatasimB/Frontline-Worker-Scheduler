@@ -19,5 +19,7 @@ class Timesheet(db.Model):
     year = db.Column(db.String(4),db.UniqueConstraint(name="uq_year"), nullable=False, default = default_year)
     selected_days = db.Column(db.String(80), nullable=True, default=default_days)
 
+
+    man_id = db.Column(db.Integer, db.ForeignKey('manager.id', name='fk_timesheet_manager'), nullable=False)
     # Foreign Key to reference the User model
     employee_id = db.Column(db.Integer, db.ForeignKey('employee.id', name='fk_timesheet_employee'), nullable=False)
