@@ -1,42 +1,54 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Calendar } from "primereact/calendar";
 import { useParams } from "react-router-dom";
+import '../css/Timesheet.css';
 
-const Timesheet = ({ viewOnly, minDate, maxDate, setViewDate, dates }) => {
-    // const [dates, setDates] = useState(null);
+const Timesheet = ({
+    viewOnly,
+    minDate,
+    maxDate,
+    viewDate,
+    setViewDate,
+    dates,
+    setSelectedDates,
+    setSelectedMonth,
+    setSelectedYear
+}) => {
     const { id } = useParams();
 
-    const handleDateChange = (e) => {
-        if (!viewOnly) {
-            setDates(e.value);
-        }
-    };
-
-    const handleDateSelect = (e) => {
-        if (viewOnly) {
-            // e.preventDefault();
-        }
-    };
-
     const handleViewDateChange = (e) => {
-        const viewDate = e.viewDate;
-        const currentMonth = viewDate?.toLocaleString("default", { month: "long" });
-        const currentYear = viewDate?.getFullYear();
+        let date = e.value;
 
-        setViewDate([currentMonth, currentYear]);
+        // Restrict navigation to minDate and maxDate
+        if (date < minDate) date = minDate;
+        if (date > maxDate) date = maxDate;
+
+        const currentMonth = date?.toLocaleString("default", { month: "long" });
+        const currentYear = date?.getFullYear();
+
+        console.log("ViewDate Changed:", { date, currentMonth, currentYear });
+
+        setSelectedMonth(currentMonth);
+        setSelectedYear(currentYear);
+        setViewDate(date);
     };
 
-    useEffect(() => {
-        console.log("DATES: ", dates);
-    }, [dates]);
+    const handleDateChange = (e) => {
+        console.log("Date selection changed:", e.value);
+
+        if (!viewOnly) {
+            setSelectedDates(e.value || []); // Update or clear dates
+        }
+    };
 
     return (
         <div>
             <div className="card flex justify-content-center">
                 <Calendar
                     value={dates}
+                    viewDate={viewDate}
+                    className={viewOnly ? "view-only-calendar" : ""}
                     onChange={handleDateChange}
-                    onSelect={handleDateSelect}
                     onViewDateChange={handleViewDateChange}
                     inline
                     showWeek
@@ -44,11 +56,9 @@ const Timesheet = ({ viewOnly, minDate, maxDate, setViewDate, dates }) => {
                     minDate={minDate}
                     maxDate={maxDate}
                     style={{
-                        fontSize: "5.5rem", // Adjust font size
-                        width: "700px", // Adjust width
-                        height: "700px", // Adjust height
-                        pointerEvents: viewOnly ? "auto" : "all", // Allow navigation
-                        opacity: viewOnly ? 0.7 : 1, // Visual cue for view-only mode
+                        fontSize: "5.5rem",
+                        width: "700px",
+                        height: "700px",
                     }}
                 />
             </div>

@@ -5,12 +5,12 @@ import json
 
 class TimesheetDao:
 
-    def add_timesheet(self,year, employee_id, month, week1, week2, week3, week4):
+    def add_timesheet(self,year, employee_id, month, selected_days):
         try:
-            new_timesheet= Timesheet(year=year, employee_id=employee_id, month=month, week1=week1, week2=week2, week3=week3, week4=week4)
+            new_timesheet= Timesheet(year=year, month=month, employee_id=employee_id, selected_days=selected_days)
             db.session.add(new_timesheet)
             db.session.commit()
-            return True, f"User {id}'s timesheet added successfully!"
+            return True, f"User {employee_id}'s timesheet added successfully!"
         except IntegrityError as e:
             db.session.rollback()
             print(e)
@@ -24,26 +24,18 @@ class TimesheetDao:
                 "employee_id": employee_id,
                 "month": month,
                 "year": year,
-                "week1": json.loads(q.week1),
-                "week2": json.loads(q.week2),
-                "week3": json.loads(q.week3),
-                "week4": json.loads(q.week4),
+                "selected_days": json.loads(q.selected_days),
             }
-            print(ts)
         return ts
 
 
-    def update_timesheet(self,year, employee_id, month, week1, week2, week3, week4):
+    def update_timesheet(self,year, employee_id, month, selected_days):
        try:
             q = Timesheet.query.filter_by(employee_id=employee_id, month=month, year=year).first()
             if not q:
                 return False, f"User {employee_id}'s timesheet not found."
-            q.week1 = week1
-            q.week2 = week2
-            q.week3 = week3
-            q.week4 = week4
+            q.selected_days = selected_days
             db.session.commit()
-
             return True, f"User {employee_id}'s timesheet updated successfully!"
        except IntegrityError as e:
             db.session.rollback()

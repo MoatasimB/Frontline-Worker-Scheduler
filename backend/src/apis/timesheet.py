@@ -38,22 +38,19 @@ class Timesheet:
                 for item in data['dates']:
                     year = item.get('year')
                     month = item.get('month')
-                    weeks = item.get('weeks')
-                    if month and weeks:
-                        week_vals = {"1": None, "2": None, "3": None, "4": None}
-                        curr =  {"Sun":"0", "Mon":"0", "Tues":"0", "Wed":"0", "Thurs":"0", "Fri":"0", "Sat":"0"}
-                        for key,days in weeks.items():
-                            for day in days:
-                                curr[day] = "1"
-                            curr_str = json.dumps(curr)
-                            week_vals[key] = curr_str
+                    selected_days = item.get('selected_days')
+                    if year and month and selected_days:
+                        # week_vals = {"1": None, "2": None, "3": None, "4": None}
+                        # curr =  {"Sun":"0", "Mon":"0", "Tues":"0", "Wed":"0", "Thurs":"0", "Fri":"0", "Sat":"0"}
+                        # for key,days in weeks.items():
+                        #     for day in days:
+                        #         curr[day] = "1"
+                        #     curr_str = json.dumps(curr)
+                        #     week_vals[key] = curr_str
                         added_timesheet, message = self.timesheetDao.add_timesheet(
                             year = year,
-                            month=month,
-                            week1=week_vals["1"],
-                            week2=week_vals["2"],
-                            week3=week_vals["3"],
-                            week4=week_vals["4"],
+                            month=month.title(),
+                            selected_days = json.dumps(selected_days),
                             employee_id=employee_id
                         )
 
@@ -96,22 +93,19 @@ class Timesheet:
                 for item in data['dates']:
                     year = item.get('year')
                     month = item.get('month')
-                    weeks = item.get('weeks')
-                    if month and weeks:
-                        curr = {"Sun": "0", "Mon": "0", "Tues": "0", "Wed": "0", "Thurs": "0", "Fri": "0", "Sat": "0"}
-                        week_vals = {"1": json.dumps(curr), "2": json.dumps(curr), "3": json.dumps(curr), "4": json.dumps(curr)}
-                        for key, days in weeks.items():
-                            for day in days:
-                                curr[day] = "1"
-                            curr_str = json.dumps(curr)
-                            week_vals[key] = curr_str
+                    selected_days = item.get('selected_days')
+                    if year and month and selected_days:
+                        # curr = {"Sun": "0", "Mon": "0", "Tues": "0", "Wed": "0", "Thurs": "0", "Fri": "0", "Sat": "0"}
+                        # week_vals = {"1": json.dumps(curr), "2": json.dumps(curr), "3": json.dumps(curr), "4": json.dumps(curr)}
+                        # for key, days in weeks.items():
+                        #     for day in days:
+                        #         curr[day] = "1"
+                        #     curr_str = json.dumps(curr)
+                        #     week_vals[key] = curr_str
                         updated_timesheet, message = self.timesheetDao.update_timesheet(
                             year=year,
                             month=month,
-                            week1=week_vals["1"],
-                            week2=week_vals["2"],
-                            week3=week_vals["3"],
-                            week4=week_vals["4"],
+                            selected_days=json.dumps(selected_days),
                             employee_id=employee_id
                         )
 

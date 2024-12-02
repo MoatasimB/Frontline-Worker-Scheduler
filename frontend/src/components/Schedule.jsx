@@ -7,26 +7,27 @@ const Schedule = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [selectedDates, setSelectedDates] = useState([]);
-    const [viewDate, setViewDate] = useState([new Date().toLocaleString("default", { month: "long" }), new Date().getFullYear()]);
+    const [viewDate, setViewDate] = useState(new Date());
+    const [selectedMonth, setSelectedMonth] = useState(viewDate?.toLocaleString("default", { month: "long" }));
+    const [selectedYear, setSelectedYear] = useState(viewDate?.getFullYear());
+
 
     const today = new Date();
     const minDate = new Date(today.getFullYear(), today.getMonth(), 1);
     const maxDate = new Date(today.getFullYear(), today.getMonth() + 2, 0);
-    const daysOfWeek = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
 
     const onEdit = (sick) => {
         navigate(`/schedule/${id}/edit?sick=${sick}`);
     };
 
     const getTimesheet = async () => {
-        const [currentMonth, currentYear] = viewDate;
-        console.log("Fetching timesheet for:", { currentMonth, currentYear }); // Debug
+        console.log("Fetching timesheet for:", { selectedMonth, selectedYear });
 
         try {
             const payload = {
                 employee_id: id,
-                month: currentMonth,
-                year: currentYear,
+                month: selectedMonth,
+                year: selectedYear,
             };
 
             const response = await fetch("http://127.0.0.1:5000/api/get_timesheet", {
@@ -41,10 +42,12 @@ const Schedule = () => {
 
             if (response.ok && data.status === "success") {
                 console.log("Success:", data);
-                const dates = generateDates(data.ts);
-                console.log(
-                    "Generated Dates:", dates.map((date) => date.toDateString()));
-                setSelectedDates(dates);
+                if(data.ts) {
+                    const dates = generateDates(data.ts);
+                    console.log(
+                        "Generated Dates:", dates.map((date) => date.toDateString()));
+                    setSelectedDates(dates);
+                }
             } else if (response.ok && data.status === "fail") {
                 console.error("API returned fail status:", data.message);
             } else {
@@ -56,53 +59,45 @@ const Schedule = () => {
     };
 
     const generateDates = (data) => {
-        const { month, year, ...weeks } = data;
-        const monthIndex = new Date(`${month} 1, ${year}`).getMonth(); // Month index (0 = January, 11 = December)
-        const yearValue = parseInt(year, 10);
-        const firstDayOfMonth = new Date(yearValue, monthIndex, 1).getDay(); // Day index of the 1st day (0 = Sunday)
-        const daysOfWeek = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"]; // Ensure consistent order
-        let dates = [];
+    const { year, month, selected_days } = data; // Destructure relevant fields
+    const monthIndex = new Date(`${month} 1, ${year}`).getMonth(); // Convert month to index (0-11)
+    const yearValue = parseInt(year, 10);
 
-        Object.entries(weeks).forEach(([weekName, week], weekIndex) => {
-            daysOfWeek.forEach((day, dayIndex) => {
-                if (week[day] === "1") {
-                    // Calculate the date offset based on week and day
-                    const dayOffset = (7 * weekIndex) + (dayIndex - firstDayOfMonth);
+    // Map selected_days to Date objects
+    const dates = selected_days.map((day) => new Date(yearValue, monthIndex, day));
 
-                    // Adjust for negative offsets (e.g., days before the first Sunday)
-                    const dayOfMonth = 1 + dayOffset;
-
-                    // Calculate the actual date
-                    const actualDate = new Date(yearValue, monthIndex, dayOfMonth);
-
-                    // Validate the date is within the correct month
-                    if (actualDate.getMonth() === monthIndex) {
-                        dates.push(actualDate);
-                    }
-                }
-            });
-        });
-
-        return dates;
-    };
+    return dates; // Return the array of Date objects
+};
 
 
 
     useEffect(() => {
-        if(viewDate) {
+    if (selectedMonth && selectedYear) {
+        // Construct the selected date
+        const selectedDate = new Date(`${selectedMonth} 1, ${selectedYear}`);
+
+        // Check if the selected date is within the allowed range
+        if (selectedDate >= minDate && selectedDate <= maxDate) {
+            console.log("Date is within range. Fetching timesheet...");
             getTimesheet();
+        } else {
+            console.log("Date is out of range. Skipping API call.");
         }
-    }, [viewDate]);
+    }
+}, [selectedMonth, selectedYear]);
 
     return (
         <div style={{ display: "flex", flexDirection: "column" }}>
             <Timesheet
-                viewOnly={true}
+                viewOnly={true} // Prevent date selection
                 minDate={minDate}
                 maxDate={maxDate}
                 viewDate={viewDate}
-                setViewDate={setViewDate} // Pass setViewDate correctly
+                setViewDate={setViewDate}
                 dates={selectedDates}
+                handleDateChange={setSelectedDates}
+                setSelectedMonth={setSelectedMonth}
+                setSelectedYear={setSelectedYear}
             />
             <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <Button label="Edit" type="button" onClick={() => onEdit(false)} />

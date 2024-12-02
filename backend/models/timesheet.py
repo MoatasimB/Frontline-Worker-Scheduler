@@ -3,8 +3,8 @@ from datetime import datetime
 import json
 
 
-def default_week():
-    return json.dumps({"Sun":"0", "Mon":"0", "Tues":"0", "Wed":"0", "Thurs":"0", "Fri":"0", "Sat":"0"})
+def default_days():
+    return json.dumps([])
 
 def default_month():
     return datetime.now().strftime("%B")
@@ -17,11 +17,7 @@ class Timesheet(db.Model):
     id = db.Column(db.Integer, primary_key=True)  # Primary Key
     month = db.Column(db.String(15),db.UniqueConstraint(name="uq_month"), nullable=False, default = default_month)
     year = db.Column(db.String(4),db.UniqueConstraint(name="uq_year"), nullable=False, default = default_year)
-    week1 = db.Column(db.String(40), nullable=True, default=default_week)
-    week2 = db.Column(db.String(40), nullable=True, default=default_week)
-    week3 = db.Column(db.String(40), nullable=True, default=default_week)
-    week4 = db.Column(db.String(40), nullable=True, default=default_week)
+    selected_days = db.Column(db.String(80), nullable=True, default=default_days)
 
-    
     # Foreign Key to reference the User model
     employee_id = db.Column(db.Integer, db.ForeignKey('employee.id', name='fk_timesheet_employee'), nullable=False)

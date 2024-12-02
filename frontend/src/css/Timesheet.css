@@ -1,0 +1,4 @@
+.view-only-calendar .p-datepicker-calendar td {
+    pointer-events: none; /* Disable pointer interaction */
+    cursor: default;      /* Change cursor to default */
+}
